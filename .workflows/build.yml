@@ -1,0 +1,36 @@
+name: build-armv7-wheels
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: "space-separated, e.g. pydantic-core==2.50.2 jiter rpds-py"
+        default: "pydantic-core==2.50.2"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: armv7-unknown-linux-gnueabihf
+      - run: pip install "maturin[zig]"
+      - name: Build
+        run: |
+          mkdir -p src wheels
+          for p in ${{ inputs.packages }}; do
+            pip download "$p" --no-binary :all: --no-deps -d src
+          done
+          cd src
+          for f in *.tar.gz; do
+            tar xzf "$f"
+            d="${f%.tar.gz}"
+            (cd "$d" && maturin build --release \
+              --target armv7-unknown-linux-gnueabihf --zig \
+              -i python3.11 -o ../../wheels)
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels
+          path: wheels/*.whl

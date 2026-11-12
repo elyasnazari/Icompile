@@ -25,7 +25,7 @@ jobs:
           # ساخت wheel برای معماری armv7a و اندروید API 24 (حداقل موردنیاز NumPy)
           python -m cibuildwheel --platform android --archs armeabi-v7a --output-dir wheelhouse .
         env:
-          CIBW_ARCHS_ANDROID: "armeabi-v7a"
+          CIBW_ARCHS_ANDROID: "armv7l"
           CIBW_ANDROID_API_LEVEL: "24"  # NumPy به API حداقل 24 نیاز دارد
           CIBW_BUILD: "cp311-*"         # نسخه پایتون را با Pydroid 3 تنظیم کنید
 

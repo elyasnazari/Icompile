@@ -1,40 +1,16 @@
-name: ساخت wheel نامپای برای اندروید armv7l (پایدروید ۳)
-
-on:
-  workflow_dispatch:
-
+name: inspect-chaquopy
+on: workflow_dispatch
 jobs:
-  build_wheels_android:
-    name: ساخت wheel برای اندروید armv7l
-    runs-on: ubuntu-latest
-
+  inspect:
+    runs-on: ubuntu-22.04
     steps:
-      - name: نصب پایتون ۳.۱۳
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: نصب cibuildwheel
-        run: python -m pip install cibuildwheel
-
-      - name: دریافت سورس‌کد NumPy
-        run: git clone --depth 1 https://github.com/numpy/numpy.git numpy-src
-
-      - name: ساخت wheel برای اندروید armv7l
+      - run: git clone --depth 1 https://github.com/chaquo/chaquopy.git
+      - name: Report
         run: |
-          cd numpy-src  # ورود به پوشه سورس NumPy
-          python -m cibuildwheel \
-            --platform android \
-            --archs armv7l \
-            --output-dir ../wheelhouse \
-            .
-        env:
-          CIBW_ARCHS_ANDROID: "armv7l"
-          CIBW_ANDROID_API_LEVEL: "24"
-          CIBW_BUILD: "cp313-*"
-
-      - name: آپلود فایل wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: numpy-android-armv7l-wheel
-          path: wheelhouse/*.whl
+          cd chaquopy
+          echo "== pypi dir =="; ls server/pypi
+          echo "== README-old (head) =="; head -70 server/pypi/README-old.md
+          echo "== numpy recipe =="; cat server/pypi/packages/numpy/meta.yaml
+          ls server/pypi/packages/numpy server/pypi/packages/numpy/patches
+          echo "== target script =="; find . -name "download-target.sh" | head
+          echo "== android =="; echo "$ANDROID_HOME"; ls "$ANDROID_HOME/ndk"

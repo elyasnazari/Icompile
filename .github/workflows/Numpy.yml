@@ -1,38 +1,39 @@
-name: Build NumPy wheel for Android armv7l (Pydroid 3)
+name: ساخت wheel نامپای برای اندروید armv7l (پایدروید ۳)
 
 on:
-  workflow_dispatch:  # 允许在 GitHub 页面手动触发
+  workflow_dispatch:
 
 jobs:
   build_wheels_android:
-    name: Build Android armv7l wheel
-    runs-on: ubuntu-latest  # Android 构建需要 Linux x86_64 运行器
+    name: ساخت wheel برای اندروید armv7l
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.13 (Android 构建的硬性要求)
+      - name: نصب پایتون ۳.۱۳
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Install cibuildwheel
+      - name: نصب cibuildwheel
         run: python -m pip install cibuildwheel
 
-      - name: Build wheel for Android armv7l
+      - name: دریافت سورس‌کد NumPy
+        run: git clone --depth 1 https://github.com/numpy/numpy.git numpy-src
+
+      - name: ساخت wheel برای اندروید armv7l
         run: |
+          cd numpy-src  # ورود به پوشه سورس NumPy
           python -m cibuildwheel \
             --platform android \
             --archs armv7l \
-            --output-dir wheelhouse \
+            --output-dir ../wheelhouse \
             .
         env:
-          CIBW_ARCHS_ANDROID: "armv7l"       # 对应 Pydroid 3 的 armeabi-v7a
-          CIBW_ANDROID_API_LEVEL: "24"       # NumPy 最低要求的 API 级别
-          CIBW_BUILD: "cp313-*"              # 只构建 CPython 3.13 的 wheel
+          CIBW_ARCHS_ANDROID: "armv7l"
+          CIBW_ANDROID_API_LEVEL: "24"
+          CIBW_BUILD: "cp313-*"
 
-      - name: Upload wheel artifact
+      - name: آپلود فایل wheel
         uses: actions/upload-artifact@v4
         with:
           name: numpy-android-armv7l-wheel

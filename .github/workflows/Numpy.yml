@@ -1,0 +1,36 @@
+name: Build NumPy wheel for Android armv7a
+
+on:
+  workflow_dispatch:  # اجازه اجرای دستی
+
+jobs:
+  build_wheels:
+    name: Build wheel for Android armv7a
+    runs-on: ubuntu-latest  # رانر لینوکس برای ساخت wheel اندروید لازم است
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # بهتر است با نسخه پایتون Pydroid 3 هماهنگ باشد
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel
+
+      - name: Build wheels for Android armv7a
+        run: |
+          # ساخت wheel برای معماری armv7a و اندروید API 24 (حداقل موردنیاز NumPy)
+          python -m cibuildwheel --platform android --archs armeabi-v7a --output-dir wheelhouse .
+        env:
+          CIBW_ARCHS_ANDROID: "armeabi-v7a"
+          CIBW_ANDROID_API_LEVEL: "24"  # NumPy به API حداقل 24 نیاز دارد
+          CIBW_BUILD: "cp311-*"         # نسخه پایتون را با Pydroid 3 تنظیم کنید
+
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: numpy-android-armv7a-wheel
+          path: wheelhouse/*.whl
